@@ -1,0 +1,213 @@
+---
+title: "HW1"
+format: pdf
+html:
+    math: mathjax
+author: Zeshi Feng
+
+---
+# Setting
+```{python}
+import math
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from pandas.plotting import scatter_matrix
+```
+
+# Exercise 1
+
+### (a) CEO Salary
+- **Type**: Regression  
+- **Reason**: We are mainly interested in understanding which predictors (profit, employees, industry) affect salary, not just predicting new values. 
+- **Goal**: Inference (understand which factors affect salary)  
+- **n** = 500  
+- **p** = 3  
+
+### (b) Product Success/Failure
+- **Type**: Classification  
+- **Reason**: The purpose is to predict whether a new product will succeed, based on previous products’ data.  
+- **Goal**: Prediction (predict whether new product will succeed)  
+- **n** = 20  
+- **p** = 13  
+
+### (c) Exchange Rate Prediction
+- **Type**: Regression  
+- **Reason**: The response variable is % change in USD/Euro, which is continuous.  
+- **Goal**: Prediction (predict % change in USD/Euro)  
+- **n** = 52  
+- **p** = 3  
+
+# Exercise 2
+
+### (a) 
+```{python}
+data = {
+    "Obs": [1, 2, 3, 4, 5, 6],
+    "X1": [0, 2, 0, 0, -1, 1],
+    "X2": [3, 0, 1, 1, 0, 1],
+    "X3": [0, 0, 3, 2, 1, 1],
+    "Y": ["Red", "Red", "Red", "Green", "Green", "Red"]
+}
+df = pd.DataFrame(data)
+test_point = np.array([0, 0, 0])
+df["Distance"] = np.sqrt((df["X1"] - test_point[0])**2 +
+                         (df["X2"] - test_point[1])**2 +
+                         (df["X3"] - test_point[2])**2)
+df_sorted = df.sort_values("Distance").reset_index(drop=True)
+df_sorted
+```
+
+### (b)
+K=1, KNN assigns the test point the same class as the single closest observation. Since Obs 5 (Green) is the nearest, the predicted class is **Green**.
+
+### (c)
+K=3, the test point is classified according to the majority among its three closest neighbors. Since 2 out of 3 are Red, the prediction is **Red**.
+
+### (d)
+If the Bayes decision boundary is highly nonlinear, the best 
+K would be small. Because small K gives KNN higher flexibility, allowing it to trace the nonlinear decision boundary more accurately.
+
+# Exercise 3
+
+### (a)
+```{python}
+college = pd.read_csv("College.csv")
+print(college.head())
+print(college.info())
+```
+
+### (b)
+```{python}
+college2 = pd.read_csv("College.csv", index_col=0)
+college = pd.read_csv("College.csv")
+college3 = college.rename({"Unnamed: 0": "College"}, axis=1)
+college3 = college3.set_index("College")
+college = college3
+college
+```
+
+### (c)
+```{python}
+summary = college.describe()
+summary
+```
+
+### (d)
+```{python}
+cols = ["Top10perc", "Apps", "Enroll"]
+scatter_matrix(college[cols], figsize=(8, 8), diagonal='hist')
+plt.show()
+```
+
+### (e)
+```{python}
+college.boxplot(column="Outstate", by="Private", figsize=(10,8))
+plt.title("Out-of-State Tuition by Private/Public")
+plt.suptitle("")
+plt.xlabel("Private")
+plt.ylabel("Outstate Tuition")
+plt.show()
+```
+
+### (f)
+```{python}
+college['Elite'] = pd.cut(
+    college['Top10perc'],
+    bins=[0, 50, 100],    
+    labels=['No', 'Yes']   
+)
+
+print(college['Elite'].value_counts())
+
+college.boxplot(column='Outstate', by='Elite', figsize=(8,6))
+
+plt.title("Out-of-State Tuition by Elite Status")
+plt.suptitle("")   
+plt.xlabel("Elite")
+plt.ylabel("Outstate Tuition")
+plt.show()
+```
+### (g)
+```{python}
+cols = ["Apps", "Accept", "Enroll", "Top10perc"]
+
+fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+
+college["Apps"].plot.hist(bins=20, ax=axes[0,0], color="skyblue", edgecolor="black")
+axes[0,0].set_title("Applications (Apps)")
+
+college["Accept"].plot.hist(bins=30, ax=axes[0,1], color="lightgreen", edgecolor="black")
+axes[0,1].set_title("Accepted (Accept)")
+
+college["Enroll"].plot.hist(bins=15, ax=axes[1,0], color="salmon", edgecolor="black")
+axes[1,0].set_title("Enrolled (Enroll)")
+
+college["Top10perc"].plot.hist(bins=25, ax=axes[1,1], color="orange", edgecolor="black")
+axes[1,1].set_title("Top10perc")
+
+plt.tight_layout()
+plt.show()
+```
+### (h)
+#### Summary: 
+Private schools generally have much higher Outstate tuition compared to public schools, with a clear separation in the boxplots. Only a small fraction of schools (78 of 777) are classified as Elite (Top10perc > 50), and these also tend to have higher tuition than non-Elite schools. The distribution of Top10perc shows that most colleges have 10–40% of freshmen from the top 10% of their high school class, but a small set of highly selective institutions reach above 80%. The number of applications, acceptances, and enrollments are highly right-skewed: while most schools have under 10,000 applications, a few receive over 40,000. Graduation rates are generally between 40–80%, though some data values exceed 100%. Overall, the dataset is heterogeneous, covering small private colleges, large state schools, and elite universities. Tuition and selectivity (Top10perc) appear positively related, and both the Private and Elite variables highlight systematic differences in costs and student profiles.
+
+# Exercise 4
+
+### 1
+
+The unit sphere in $\mathbb{R}^p$ fits inside the hypercube $[-1,\,1]^p$, whose side length is $2$.  
+In $p$ dimensions, the volume of a hypercube is $(\text{side length})^p$. Therefore,
+
+$V_c(p) = 2^p$
+
+
+
+### 2
+
+The volume of the $p$-dimensional unit ball is
+
+$V_s(p) = \dfrac{\pi^{p/2}}{\Gamma\!\left(\tfrac{p}{2}+1\right)}$
+
+- If $p=2m$ (even): $V_s(2m) = \dfrac{\pi^m}{m!}$  
+- If $p=2m+1$ (odd): $V_s(2m+1) = \dfrac{2^{m+1}\pi^m}{(2m+1)!!}$  
+
+Examples: $V_s(2)=\pi$, $V_s(3)=\tfrac{4}{3}\pi$
+
+### 3
+
+The ratio is defined as
+
+$\alpha(p) = \dfrac{V_s(p)}{V_c(p)}$
+
+where $V_s(p) = \dfrac{\pi^{p/2}}{\Gamma\!\left(\tfrac{p}{2}+1\right)}$ and $V_c(p) = 2^p$.  
+Thus,
+
+$\alpha(p) = \dfrac{\pi^{p/2}}{2^p \, \Gamma\!\left(\tfrac{p}{2}+1\right)}$
+
+### 4
+```{python}
+def V_s(p):
+    return math.pi**(p/2) / math.gamma(p/2 + 1)
+
+def V_c(p):
+    return 2**p
+
+p_vals = np.arange(1, 21)
+alpha_vals = [V_s(p) / V_c(p) for p in p_vals]
+
+df = pd.DataFrame({"p": p_vals, "alpha(p)": alpha_vals})
+print(df)
+
+plt.figure(figsize=(8, 5))
+plt.plot(p_vals, alpha_vals, marker="o", color="orange")
+plt.title(r"Ratio $\alpha(p) = V_s(p)/V_c(p)$ for $p=1,2,\dots,20$")
+plt.xlabel("Dimension p")
+plt.ylabel(r"$\alpha(p)$")
+plt.grid(True)
+plt.show()
+```
+
+### 5
+The statement “In higher dimensions most of the volume is in the corners” is accurate. As dimension increases, the inscribed sphere occupies a vanishing fraction of the cube’s volume. Most of the cube’s volume lies near its corners and edges, far from the center. This is a direct manifestation of the curse of dimensionality.
